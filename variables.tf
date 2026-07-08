@@ -323,6 +323,22 @@ variable "efs_volumes" {
   default     = []
 }
 
+variable "s3_files_volumes" {
+  type = list(object({
+    host_path = string
+    name      = string
+    s3files_volume_configuration = list(object({
+      file_system_arn         = string
+      access_point_arn        = optional(string)
+      root_directory          = optional(string)
+      transit_encryption_port = optional(number)
+    }))
+  }))
+
+  description = "Task S3 Files volume definitions as list of configuration objects. You can define multiple S3 Files volumes on the same task definition, but a single volume can only have one `s3files_volume_configuration`. `file_system_arn` is required; `access_point_arn` is optional, but if set, `root_directory` here must be omitted or `\"/\"` (scope via the access point's own `root_directory` instead)."
+  default     = []
+}
+
 variable "bind_mount_volumes" {
   type = list(any)
   #  host_path = optional(string)

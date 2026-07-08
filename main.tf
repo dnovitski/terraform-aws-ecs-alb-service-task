@@ -10,7 +10,7 @@ locals {
   create_security_group           = local.enabled && var.network_mode == "awsvpc" && var.security_group_enabled
   create_task_definition          = local.enabled && length(var.task_definition) == 0
 
-  volumes = concat(var.docker_volumes, var.efs_volumes, var.fsx_volumes, var.bind_mount_volumes)
+  volumes = concat(var.docker_volumes, var.efs_volumes, var.fsx_volumes, var.s3_files_volumes, var.bind_mount_volumes)
 
   redeployment_trigger = var.force_new_deployment && var.redeploy_on_apply ? {
     redeployment = plantimestamp()
@@ -149,6 +149,16 @@ resource "aws_ecs_task_definition" "default" {
               domain                = lookup(authorization_config.value, "domain", null)
             }
           }
+        }
+      }
+
+      dynamic "s3files_volume_configuration" {
+        for_each = lookup(volume.value, "s3files_volume_configuration", [])
+        content {
+          file_system_arn         = lookup(s3files_volume_configuration.value, "file_system_arn", null)
+          access_point_arn        = lookup(s3files_volume_configuration.value, "access_point_arn", null)
+          root_directory          = lookup(s3files_volume_configuration.value, "root_directory", null)
+          transit_encryption_port = lookup(s3files_volume_configuration.value, "transit_encryption_port", null)
         }
       }
     }
