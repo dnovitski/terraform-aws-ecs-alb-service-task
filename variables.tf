@@ -325,7 +325,7 @@ variable "efs_volumes" {
 
 variable "s3_files_volumes" {
   type = list(object({
-    host_path = string
+    host_path = optional(string)
     name      = string
     s3files_volume_configuration = list(object({
       file_system_arn         = string
